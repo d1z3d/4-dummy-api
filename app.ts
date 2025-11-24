@@ -1,4 +1,10 @@
-interface DummyjsonUserRs {
+interface DummyjsonUsersRs {
+  users: Users[];
+  total: string;
+  skip: number;
+  limit: number;
+}
+interface Users {
   id: number;
   firstName: string;
   lastName: string;
@@ -75,16 +81,25 @@ interface Hair {
   type: string;
 }
 
-async function fetchUsers(): Promise<Array<DummyjsonUserRs>> {
-  const res: Response = await fetch(`https://dummyjson.com/users`);
-  if (!res.ok) {
-    throw new Error(`${res.status}`);
+async function fetchUsers(): Promise<Users[]> {
+  try {
+    const res: Response = await fetch(`https://dummyjson.com/users`);
+    if (!res.ok) {
+      throw new Error(`${res.status}`);
+    }
+    const result: DummyjsonUsersRs = await res.json();
+    return result.users;
+  } catch (e: unknown) {
+    const error: Error = e as Error;
+    console.error(error.message);
+    throw error;
   }
-
-  const result: Array<DummyjsonUserRs> = await res.json();
-  return result;
 }
 
 (async () => {
-  fetchUsers().then(console.log);
+  fetchUsers().then((users) => {
+    users.forEach((user) =>
+      console.log(`Имя: ${user.firstName}, фамилия: ${user.lastName}`)
+    );
+  });
 })();
